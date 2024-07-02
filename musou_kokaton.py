@@ -284,8 +284,8 @@ def main():
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
-            if score.value >= 20:  #電磁パルス
-                if event.type == pg.KEYDOWN and event.key == pg.K_e:
+            if event.type == pg.KEYDOWN and event.key == pg.K_e:
+                if score.value >= 20:  #電磁パルス
                     Emp(bombs, emys, screen)
                     score.value -= 20
 
