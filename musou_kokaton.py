@@ -279,11 +279,9 @@ def main():
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 if event.mod == 1:
-                    print(len(beams))
                     nbeam = NeoBeam(bird, 5)
                     beams.add(nbeam.gen_beams())
                     # beams.add(i for i in NeoBeam(bird, 5))
-                    print(len(beams))
                 else:
                     beams.add(Beam(bird))
         screen.blit(bg_img, [0, 0])
