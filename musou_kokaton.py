@@ -141,14 +141,14 @@ class Beam(pg.sprite.Sprite):
     """
     ビームに関するクラス
     """
-    def __init__(self, bird: Bird):
+    def __init__(self, bird: Bird, angle0: int = 0):
         """
         ビーム画像Surfaceを生成する
         引数 bird：ビームを放つこうかとん
         """
         super().__init__()
         self.vx, self.vy = bird.dire
-        angle = math.degrees(math.atan2(-self.vy, self.vx))
+        angle = math.degrees(math.atan2(-self.vy, self.vx)) + angle0
         self.image = pg.transform.rotozoom(pg.image.load(f"fig/beam.png"), angle, 2.0)
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
@@ -165,6 +165,22 @@ class Beam(pg.sprite.Sprite):
         self.rect.move_ip(self.speed*self.vx, self.speed*self.vy)
         if check_bound(self.rect) != (True, True):
             self.kill()
+
+class NeoBeam(Beam):
+    def __init__(self, bird: Bird, num: int):
+        super().__init__(bird)
+        self.bird = bird
+        self.num = num
+        # NeoBeam.gen_beams(self)
+
+    def gen_beams(self):
+        bls = []
+        bnum = range(-50, +51, 100 // (self.num - 1))
+        for i in bnum:
+            bls.append(Beam(self.bird, i))
+        return bls
+
+
 
 
 class Explosion(pg.sprite.Sprite):
@@ -193,6 +209,21 @@ class Explosion(pg.sprite.Sprite):
         self.image = self.imgs[self.life//10%2]
         if self.life < 0:
             self.kill()
+
+
+class Gravity(pg.sprite.Sprite):
+    def __init__(self, life: int):
+        super().__init__()
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        self.rect = self.image.get_rect()
+        pg.draw.rect(self.image, (0,0,0),(0, 0, WIDTH, HEIGHT))
+        self.image.set_alpha(128)
+        self.life = life    
+    def update(self):
+        self.life -= 1
+        if self.life < 0:
+            self.kill()
+        # screen.blit(self.img, self.rct)
 
 
 class Enemy(pg.sprite.Sprite):
@@ -253,6 +284,7 @@ def main():
     beams = pg.sprite.Group()
     exps = pg.sprite.Group()
     emys = pg.sprite.Group()
+    gravity = pg.sprite.Group()
 
     tmr = 0
     clock = pg.time.Clock()
@@ -262,7 +294,16 @@ def main():
             if event.type == pg.QUIT:
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                beams.add(Beam(bird))
+                if event.mod == 1:
+                    nbeam = NeoBeam(bird, 5)
+                    beams.add(nbeam.gen_beams())
+                    # beams.add(i for i in NeoBeam(bird, 5))
+                else:
+                    beams.add(Beam(bird))
+            if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                if score.value >= 200:
+                    gravity.add(Gravity(400))
+                    score.value -= 200
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
@@ -281,6 +322,12 @@ def main():
         for bomb in pg.sprite.groupcollide(bombs, beams, True, True).keys():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
             score.value += 1  # 1点アップ
+        
+        for bomb in pg.sprite.groupcollide(bombs, gravity, True, False).keys():
+            exps.add(Explosion(bomb, 50))
+
+        for emy in pg.sprite.groupcollide(emys, gravity, True, False).keys():
+            exps.add(Explosion(emy, 50))
 
         if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
             bird.change_img(8, screen) # こうかとん悲しみエフェクト
@@ -296,6 +343,8 @@ def main():
         emys.draw(screen)
         bombs.update()
         bombs.draw(screen)
+        gravity.update()
+        gravity.draw(screen)
         exps.update()
         exps.draw(screen)
         score.update(screen)
