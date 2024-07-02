@@ -273,6 +273,27 @@ class Score:
         screen.blit(self.image, self.rect)
 
 
+class Emp:
+    """
+    enmを発動
+    引数 bombs:Bombインスタンスグループ emys:Enemyインスタンスグループ
+         screen:画面Surface
+    """
+    def __init__(self, bombs: pg.sprite.Group, emys:pg.sprite.Group, screen: pg.Surface):
+        for emy in emys:
+            emy.interval = math.inf
+            emy.image = pg.transform.laplacian(emy.image)
+            emy.image.set_colorkey((0,0,0))
+        for bomb in bombs:
+            bomb.speed /= 2
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        pg.draw.rect = (self.image, (255, 255, 0), (0, 0, 1600, 900))
+        self.image.set_alpha(100)
+        screen.blit(self.image, [0, 0])
+        time.sleep(0.05)
+        pg.display.update()
+
+
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -300,6 +321,11 @@ def main():
                     # beams.add(i for i in NeoBeam(bird, 5))
                 else:
                     beams.add(Beam(bird))
+            if event.type == pg.KEYDOWN and event.key == pg.K_e:
+                if score.value >= 20:  #電磁パルス
+                    Emp(bombs, emys, screen)
+                    score.value -= 20
+
             if event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
                 if score.value >= 200:
                     gravity.add(Gravity(400))
@@ -335,6 +361,7 @@ def main():
             pg.display.update()
             time.sleep(2)
             return
+        
 
         bird.update(key_lst, screen)
         beams.update()
