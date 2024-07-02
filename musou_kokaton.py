@@ -242,6 +242,27 @@ class Score:
         screen.blit(self.image, self.rect)
 
 
+class Emp:
+    """
+    enmを発動
+    引数 bombs:Bombインスタンスグループ enms:Enemyインスタンスグループ
+         screen:画面Surface
+    """
+    def __init__(self, bombs: pg.sprite.Group, enms:pg.sprite.Group, screen: pg.Surface):
+        for enm in enms:
+            enm.interval = math.inf
+            enm.image = pg.transform.laplacian(enm.image)
+            enm.image.set_colorkey((0,0,0))
+        for bomb in bombs:
+            bomb.speed /= 2
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        pg.draw.rect = (self.image, (255, 255, 0), (0, 0, 1600, 900))
+        self.image.set_alpha(100)
+        screen.blit(self.image, [0, 0])
+        pg.display.update()
+        time.sleep(0.05)
+
+
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -263,6 +284,12 @@ def main():
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
+            
+            if score.value >= 20:  #電磁パルス
+                if event.type == pg.KEYDOWN and event.key == pg.K_e:
+                    Emp(bombs, emys, screen)
+                    score.value -= 20
+
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
@@ -288,6 +315,7 @@ def main():
             pg.display.update()
             time.sleep(2)
             return
+        
 
         bird.update(key_lst, screen)
         beams.update()
