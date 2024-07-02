@@ -245,14 +245,14 @@ class Score:
 class Emp:
     """
     enmを発動
-    引数 bombs:Bombインスタンスグループ enms:Enemyインスタンスグループ
+    引数 bombs:Bombインスタンスグループ emys:Enemyインスタンスグループ
          screen:画面Surface
     """
-    def __init__(self, bombs: pg.sprite.Group, enms:pg.sprite.Group, screen: pg.Surface):
-        for enm in enms:
-            enm.interval = math.inf
-            enm.image = pg.transform.laplacian(enm.image)
-            enm.image.set_colorkey((0,0,0))
+    def __init__(self, bombs: pg.sprite.Group, emys:pg.sprite.Group, screen: pg.Surface):
+        for emy in emys:
+            emy.interval = math.inf
+            emy.image = pg.transform.laplacian(emy.image)
+            emy.image.set_colorkey((0,0,0))
         for bomb in bombs:
             bomb.speed /= 2
         self.image = pg.Surface((WIDTH, HEIGHT))
