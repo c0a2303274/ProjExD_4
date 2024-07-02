@@ -259,8 +259,8 @@ class Emp:
         pg.draw.rect = (self.image, (255, 255, 0), (0, 0, 1600, 900))
         self.image.set_alpha(100)
         screen.blit(self.image, [0, 0])
-        pg.display.update()
         time.sleep(0.05)
+        pg.display.update()
 
 
 def main():
@@ -284,7 +284,6 @@ def main():
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
-            
             if score.value >= 20:  #電磁パルス
                 if event.type == pg.KEYDOWN and event.key == pg.K_e:
                     Emp(bombs, emys, screen)
