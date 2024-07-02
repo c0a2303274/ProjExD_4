@@ -72,6 +72,9 @@ class Bird(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = xy
         self.speed = 10
+        # self.state = "normal"
+        # self.hyper_life = 0
+        # self.value = 0
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -87,15 +90,16 @@ class Bird(pg.sprite.Sprite):
         押下キーに応じてこうかとんを移動させる
         引数1 key_lst：押下キーの真理値リスト
         引数2 screen：画面Surface
+        無敵の発動条件、発動時間、消費スコアの設定
         """
         sum_mv = [0, 0]
         for k, mv in __class__.delta.items():
             if key_lst[k]:
                 sum_mv[0] += mv[0]
                 sum_mv[1] += mv[1]
-        self.rect.move_ip(self.speed*sum_mv[0], self.speed*sum_mv[1])
+        self.rect.move_ip(self.speed * sum_mv[0], self.speed * sum_mv[1])
         if check_bound(self.rect) != (True, True):
-            self.rect.move_ip(-self.speed*sum_mv[0], -self.speed*sum_mv[1])
+            self.rect.move_ip(-self.speed * sum_mv[0], -self.speed * sum_mv[1])
         if not (sum_mv[0] == 0 and sum_mv[1] == 0):
             self.dire = tuple(sum_mv)
             self.image = self.imgs[self.dire]
@@ -256,6 +260,8 @@ def main():
 
     tmr = 0
     clock = pg.time.Clock()
+    state = "normal"
+    hyper_life = 0
     while True:
         key_lst = pg.key.get_pressed()
         for event in pg.event.get():
@@ -263,6 +269,20 @@ def main():
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
+            #無敵発動する方法と条件
+            if key_lst[pg.K_RSHIFT] and score.value >= 100 and state == "normal":
+                state = "hyper"
+                hyper_life = 500
+                bird.image = pg.transform.laplacian(bird.image)
+                score.value -= 100
+            #無敵発動中の状態
+            if state == "hyper":
+                hyper_life -= 1
+                if hyper_life < 0:
+                    state = "normal"
+                    # image = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)  # 元の画像に戻す
+
+            # screen.blit(image, pg.rect)
         screen.blit(bg_img, [0, 0])
 
         if tmr%200 == 0:  # 200フレームに1回，敵機を出現させる
@@ -282,12 +302,16 @@ def main():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
             score.value += 1  # 1点アップ
 
-        if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
-            bird.change_img(8, screen) # こうかとん悲しみエフェクト
-            score.update(screen)
-            pg.display.update()
-            time.sleep(2)
-            return
+        for bomb in pg.sprite.spritecollide(bird, bombs, True):
+            if state == "hyper":
+                exps.add(Explosion(bomb, 50))
+            if state == "normal":
+                bird.change_img(8, screen) # こうかとん悲しみエフェクト
+                score.update(screen)
+                pg.display.update()
+                time.sleep(2)
+                return
+            
 
         bird.update(key_lst, screen)
         beams.update()
