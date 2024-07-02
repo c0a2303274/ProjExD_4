@@ -371,13 +371,13 @@ def main():
             if key_lst[pg.K_RSHIFT] and score.value >= 100 and state == "normal":
                 state = "hyper"
                 hyper_life = 500
-                bird.image = pg.transform.laplacian(bird.image)
                 score.value -= 100
             #無敵発動中の状態
-            if state == "hyper":
-                hyper_life -= 1
-                if hyper_life < 0:
-                    state = "normal"
+        if state == "hyper":
+            bird.image = pg.transform.laplacian(bird.image)
+            hyper_life -= 1
+            if hyper_life < 0:
+                state = "normal"
                     # image = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)  # 元の画像に戻す
 
             # screen.blit(image, pg.rect)
